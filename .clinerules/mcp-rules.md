@@ -1,0 +1,1 @@
+always use Contect7 MCP when you need to add a code that requires new module or libraries

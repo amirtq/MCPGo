@@ -1,0 +1,28 @@
+# MCPGo Gateway Configuration
+
+agent:
+  # Configuration for the agent-facing endpoint
+  http:
+    addr: ":8080"
+    timeout: 10s
+  ws:
+    addr: ":8081"
+
+routing:
+  # Defines how incoming requests are routed to MCP servers
+  strategy: "simple-router" # e.g., simple-router, content-based-router
+
+servers:
+  # Pre-configured MCP servers (static configuration)
+  # - id: "static-server-1"
+  #   name: "Example Static Server"
+  #   address: "http://localhost:9001"
+  #   protocol: "mcp/v1"
+
+limits:
+  # Rate limiting and concurrency settings
+  rate:
+    requests_per_second: 100
+    burst: 20
+  concurrency:
+    max_concurrent_requests: 50
