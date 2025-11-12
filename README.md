@@ -38,6 +38,16 @@ To run the gateway, use:
 make run
 ```
 
+The server will start on the address specified in the configuration (default: `:443`).
+
+### MCP Gateway Endpoint
+
+MCPGo now speaks the Model Context Protocol directly. Agents can establish a
+WebSocket connection to the `/mcp` endpoint using the standard `Sec-WebSocket-Protocol: mcp`
+subprotocol. Each client session is proxied to the upstream MCP server defined
+in the configuration, and responses are streamed back transparently using the
+standard MCP message format. This makes MCPGo act as a gateway between agents
+and upstream MCP services without altering the payloads.
 The server will start on `https://localhost:443`.
 
 ### Test

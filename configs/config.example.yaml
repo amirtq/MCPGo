@@ -1,12 +1,13 @@
 # MCPGo Gateway Configuration
 
 agent:
-  # Configuration for the agent-facing endpoint
+  # Configuration for the agent-facing endpoint. The HTTP listener also serves
+  # the WebSocket MCP endpoint at /mcp.
   http:
-    addr: ":8080"
+    addr: ":443"
     timeout: 10s
   ws:
-    addr: ":8081"
+    addr: ""
 
 routing:
   # Defines how incoming requests are routed to MCP servers
@@ -14,10 +15,10 @@ routing:
 
 servers:
   # Pre-configured MCP servers (static configuration)
-  # - id: "static-server-1"
-  #   name: "Example Static Server"
-  #   address: "http://localhost:9001"
-  #   protocol: "mcp/v1"
+  - id: "local-echo"
+    name: "Local Echo MCP"
+    address: "ws://localhost:9001/mcp"
+    protocol: "mcp/v1"
 
 limits:
   # Rate limiting and concurrency settings
