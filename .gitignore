@@ -1,3 +1,4 @@
 **/.DS_Store
 /backend/services/ssl/cert.pem
 /backend/services/ssl/key.pem
+bin/mcpgo
