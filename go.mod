@@ -5,9 +5,11 @@ go 1.24.0
 toolchain go1.24.1
 
 require (
-	github.com/gorilla/mux v1.8.1
-	github.com/swaggo/http-swagger v1.3.4
-	github.com/swaggo/swag v1.16.6
+        github.com/gorilla/mux v1.8.1
+        github.com/swaggo/http-swagger v1.3.4
+        github.com/swaggo/swag v1.16.6
+        go.yaml.in/yaml/v3 v3.0.4
+        golang.org/x/net v0.46.0
 )
 
 require (
@@ -23,7 +25,7 @@ require (
 	github.com/go-openapi/swag/typeutils v0.25.1 // indirect
 	github.com/go-openapi/swag/yamlutils v0.25.1 // indirect
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe // indirect
-	go.yaml.in/yaml/v3 v3.0.4 // indirect
+        go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/mod v0.30.0 // indirect
 	golang.org/x/net v0.46.0 // indirect
 	golang.org/x/sync v0.18.0 // indirect
