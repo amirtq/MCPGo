@@ -4,84 +4,61 @@ This document provides a high-level overview of the architecture used in the MCP
 
 ## 1. Core Principles
 
-The architecture is based on a combination of well-established patterns:
+The architecture is based on a **Feature-Sliced Design**. This means that instead of being organized by technical layers (e.g., "controllers," "services," "repositories"), the code is grouped by feature. This approach enhances modularity, making it easier to develop, maintain, and scale individual parts of the application.
 
-- **Clean Architecture:** Enforces a strict separation of concerns, ensuring the core business logic (Domain) is independent of external frameworks and technologies.
-- **CQRS (Command Query Responsibility Segregation):** Separates read and write operations, allowing for optimized and scalable data models for each.
-- **Hexagonal Architecture (Ports and Adapters):** The application communicates with the outside world through "ports" (interfaces), which are implemented by "adapters" (infrastructure).
+Each feature slice is self-contained and exposes its functionality through a well-defined public API.
 
-## 2. The Layers
+## 2. Core Components
 
-The project is divided into four primary layers, with a strict dependency rule: outer layers can depend on inner layers, but not the other way around.
+The project is primarily organized into three main directories within the `backend/` folder:
 
 ```
-+-----------------------------------------------------------------+
-|                           Interfaces                            |
-|              (HTTP Handlers, WebSocket Controllers)             |
-+-----------------------------------------------------------------+
-      |
-      v
-+-----------------------------------------------------------------+
-|                          Application                            |
-| (Commands, Queries, Handlers, DTOs, Ports/Interfaces)           |
-+-----------------------------------------------------------------+
-      |
-      v
-+-----------------------------------------------------------------+
-|                             Domain                              |
-|              (Entities, Value Objects, Domain Events)           |
-+-----------------------------------------------------------------+
-
-+-----------------------------------------------------------------+
-|                         Infrastructure                          |
-| (DB Repos, Event Bus Impl, Config Loader, Logger, Connectors)   |
-+-----------------------------------------------------------------+
+backend/
+  ├── api/
+  │   └── [feature]/
+  │       ├── router.go
+  │       └── handlers.go
+  ├── apps/
+  │   └── [feature]/
+  │       └── app.go
+  └── services/
+      └── [service]/
+          └── service.go
 ```
 
-### 2.1. Domain Layer
+### 2.1. `apps`
 
-- **Location:** `internal/domain/`
-- **Responsibility:** This is the heart of the application. It contains the core business logic, rules, and data structures (Entities, Value Objects).
-- **Rules:**
-    - It is pure and has **zero dependencies** on any other layer or external library.
-    - It knows nothing about databases, APIs, or frameworks.
+- **Location:** `backend/apps/`
+- **Responsibility:** This is the heart of the application. Each subdirectory in `apps` represents a distinct feature and contains its core business logic. It defines the primary application object for that feature.
+- **Example:** `backend/apps/health/app.go` contains the `App` struct and the `CheckHealth` method, which implements the logic for the health check feature.
 
-### 2.2. Application Layer
+### 2.2. `api`
 
-- **Location:** `internal/application/`
-- **Responsibility:** This layer orchestrates the use cases of the application. It defines the commands and queries that represent user intent.
+- **Location:** `backend/api/`
+- **Responsibility:** This layer exposes the application's features to the outside world via an HTTP API. It adapts incoming requests into calls to the corresponding `app` in the `apps` directory.
 - **Key Components:**
-    - **Commands/Queries:** Simple data structures that represent a request to change state or retrieve data.
-    - **Handlers:** Execute the logic for a specific command or query. They use domain entities to perform business operations.
-    - **Ports:** Interfaces that define the contracts for external dependencies (e.g., `ServerRepository`, `EventBus`). This is the key to the "Ports and Adapters" pattern.
-    - **DTOs (Data Transfer Objects):** Used to transfer data between layers without exposing domain entities.
+    - **Router:** Defines the HTTP routes for a feature and maps them to the appropriate handlers.
+    - **Handlers:** Contain the logic for handling incoming HTTP requests, calling the `app` to execute business logic, and formatting the HTTP response.
+- **Example:** `backend/api/health/router.go` creates a new router for the health feature, defines the `/health` endpoint, and uses the `health.App` to get the application's status.
 
-### 2.3. Interfaces Layer
+### 2.3. `services`
 
-- **Location:** `internal/interfaces/`
-- **Responsibility:** This layer exposes the application's functionality to the outside world. It adapts incoming requests into application-layer commands and queries.
+- **Location:** `backend/services/`
+- **Responsibility:** This directory contains shared, cross-cutting concerns that can be used by any feature. These are the "infrastructure" level components of the application.
 - **Examples:**
-    - HTTP API handlers (`http/`)
-    - WebSocket controllers (`ws/`)
-    - gRPC services
-
-### 2.4. Infrastructure Layer
-
-- **Location:** `internal/infrastructure/`
-- **Responsibility:** This layer provides the concrete implementations (adapters) for the ports defined in the application layer.
-- **Examples:**
-    - **Persistence:** A PostgreSQL or in-memory implementation of a `ServerRepository` interface.
+    - **SSL:** A service for managing TLS certificates.
+    - **Database:** A service for connecting to and querying a database (if one were present).
     - **Connectors:** Clients for communicating with external MCP servers.
-    - **EventBus:** An implementation using RabbitMQ or an in-memory bus.
-    - **Observability:** Logging, metrics, and tracing implementations.
 
-## 3. The Dependency Rule in Action
+## 3. Request Flow Example
 
-1. An HTTP request hits a handler in the **Interfaces** layer.
-2. The handler creates a `Command` or `Query` object and dispatches it to the **Application** layer.
-3. The corresponding handler in the **Application** layer is invoked.
-4. The handler interacts with **Domain** entities to perform business logic.
-5. If the handler needs to persist data, it calls a method on a **Port** (e.g., `serverRepo.Save(...)`).
-6. The dependency injection container provides a concrete implementation of that port from the **Infrastructure** layer (e.g., `PostgresServerRepo`), which performs the actual database operation.
+Here’s how a typical HTTP request flows through the system:
 
-This structure ensures that the core logic is decoupled and testable in isolation, while allowing the technical implementation details to be swapped out easily.
+1.  An HTTP request (e.g., `GET /health`) is received by the main router in `backend/main.go`.
+2.  The main router delegates the request to the router for the `health` feature, which is defined in `backend/api/health/router.go`.
+3.  The `health` router invokes the `healthHandler`.
+4.  The `healthHandler` calls the `CheckHealth` method on the `health.App` instance (from `backend/apps/health/app.go`) to execute the business logic.
+5.  The `health.App` returns the result to the handler.
+6.  The handler formats the result as a JSON response and sends it back to the client.
+
+This structure ensures that each feature is well-encapsulated, making the codebase easier to understand and maintain.
