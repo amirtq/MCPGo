@@ -111,16 +111,3 @@ func (h *Handlers) RouteCallHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
 }
-
-// HealthzHandler is a simple health check endpoint.
-// @Summary Health check
-// @Description Health check
-// @Tags health
-// @Produce  json
-// @Success 200 {object} map[string]string
-// @Router /health [get]
-func (h *Handlers) HealthHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"status": "healthy"})
-}

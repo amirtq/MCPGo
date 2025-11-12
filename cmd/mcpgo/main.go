@@ -30,8 +30,10 @@ import (
 	"syscall"
 	"time"
 
+	health_api "mcpgo/internal/api/health"
 	"mcpgo/internal/application/commands"
 	"mcpgo/internal/application/queries"
+	"mcpgo/internal/apps/health"
 	"mcpgo/internal/infrastructure/connectors"
 	"mcpgo/internal/infrastructure/eventbus"
 	"mcpgo/internal/infrastructure/obs"
@@ -63,6 +65,12 @@ func main() {
 
 	// 4. Create Router and Server
 	router := http_iface.NewRouter(handlers)
+
+	// Initialize and register apps
+	healthApp := health.NewApp()
+	healthAPI := health_api.NewRouter(healthApp)
+	healthAPI.RegisterRoutes(router)
+
 	server := &http.Server{
 		Addr:    ":443", // This would come from config in a real app
 		Handler: router,

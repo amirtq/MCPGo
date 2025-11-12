@@ -18,7 +18,6 @@ func NewRouter(handlers *Handlers) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/swagger/", httpSwagger.WrapHandler)
-	mux.HandleFunc("GET /health", handlers.HealthHandler)
 
 	mux.HandleFunc("POST /servers", handlers.RegisterServerHandler)
 	mux.HandleFunc("GET /servers", handlers.ListServersHandler)
