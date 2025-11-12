@@ -5,8 +5,8 @@ MCPGo is a lightweight, high-performance, and future-ready gateway that connects
 ## 🎯 Core Principles
 
 - **Language:** Go (latest stable version)
-- **Architecture:** Domain-driven, CQRS, Hexagonal (Ports & Adapters)
-- **Dependency Rule:** `interfaces` → `application` → `domain`. `infrastructure` only implements ports defined in the `application` layer.
+- **Architecture:** Feature-Sliced Design
+- **Dependency Rule:** Code is organized by feature, not by technical layer.
 - **Simplicity:** No heavy code generation or magic. Just clean, idiomatic Go.
 
 ## ⚖️ License
@@ -38,7 +38,7 @@ To run the gateway, use:
 make run
 ```
 
-The server will start on the address specified in the configuration (default: `:8080`).
+The server will start on `https://localhost:443`.
 
 ### Test
 
@@ -58,11 +58,11 @@ make lint
 
 ## 🏛️ Architecture
 
-The project follows a clean architecture pattern, separating concerns into four main layers:
+The project follows a **Feature-Sliced Design**. Instead of being organized by technical layers, the code is grouped by feature. This enhances modularity and makes the application easier to develop and maintain.
 
-- **Domain:** Contains the core business logic, entities, and value objects. It has no dependencies on any other layer.
-- **Application:** Orchestrates the business logic using CQRS. It defines ports (interfaces) for external dependencies like databases or event buses.
-- **Interfaces:** Exposes the application to the outside world via APIs (e.g., HTTP, WebSockets).
-- **Infrastructure:** Provides concrete implementations for the ports defined in the application layer (e.g., database repositories, event bus clients).
+The main components are:
+- **`backend/apps`**: Contains the core business logic for each feature.
+- **`backend/api`**: Exposes the features via an HTTP API.
+- **`backend/services`**: Holds shared, cross-cutting concerns like SSL management.
 
 For a more detailed explanation, see [docs/architecture.md](docs/architecture.md).
