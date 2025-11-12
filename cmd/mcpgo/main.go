@@ -17,7 +17,6 @@
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host localhost
 // @BasePath /
 // @schemes https
 package main
@@ -30,46 +29,33 @@ import (
 	"syscall"
 	"time"
 
-	health_api "mcpgo/internal/api/health"
-	"mcpgo/internal/application/commands"
-	"mcpgo/internal/application/queries"
-	"mcpgo/internal/apps/health"
-	"mcpgo/internal/infrastructure/connectors"
-	"mcpgo/internal/infrastructure/eventbus"
-	"mcpgo/internal/infrastructure/obs"
-	"mcpgo/internal/infrastructure/persistence/memory"
-	http_iface "mcpgo/internal/interfaces/http"
-	"mcpgo/internal/platform/certs"
+	"log"
 
-	_ "mcpgo/docs"
+	health_api "mcpgo/backend/api/health"
+	swagger_api "mcpgo/backend/api/swagger"
+	"mcpgo/backend/apps/health"
+	swagger_app "mcpgo/backend/apps/swagger"
+	"mcpgo/backend/services/ssl"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
+	swagger_app.SwaggerInfo.Host = "localhost:443"
 	// 1. Initialize Infrastructure
-	logger := obs.NewLogger()
-	serverRepo := memory.NewInMemoryServerRepo()
-	eventBus := eventbus.NewInMemoryEventBus(logger.Logger)
-	connectorClient := connectors.NewMockConnectorClient(logger.Logger)
-
-	// 2. Initialize Application Layer (CQRS Handlers)
-	registerServerHandler := commands.NewRegisterServerHandler(serverRepo, eventBus)
-	listServersHandler := queries.NewListServersHandler(serverRepo)
-	routeCallHandler := commands.NewRouteCallHandler(serverRepo, connectorClient)
-
-	// 3. Initialize Interface Layer (HTTP Handlers)
-	handlers := &http_iface.Handlers{
-		RegisterServer: registerServerHandler,
-		ListServers:    listServersHandler,
-		RouteCall:      routeCallHandler,
-	}
+	logger := log.Default()
 
 	// 4. Create Router and Server
-	router := http_iface.NewRouter(handlers)
+	router := mux.NewRouter()
 
 	// Initialize and register apps
 	healthApp := health.NewApp()
 	healthAPI := health_api.NewRouter(healthApp)
 	healthAPI.RegisterRoutes(router)
+
+	swaggerApp := swagger_app.NewApp()
+	swaggerAPI := swagger_api.NewRouter(swaggerApp)
+	swaggerAPI.RegisterRoutes(router)
 
 	server := &http.Server{
 		Addr:    ":443", // This would come from config in a real app
@@ -77,13 +63,13 @@ func main() {
 	}
 
 	// 5. Ensure certificates are available and start server with Graceful Shutdown
-	if err := certs.EnsureCerts(); err != nil {
+	if err := ssl.EnsureSSL(); err != nil {
 		logger.Fatalf("Could not ensure certificates: %v\n", err)
 	}
 
 	go func() {
 		logger.Println("Starting server on https://localhost" + server.Addr)
-		if err := server.ListenAndServeTLS("configs/certs/cert.pem", "configs/certs/key.pem"); err != nil && err != http.ErrServerClosed {
+		if err := server.ListenAndServeTLS("backend/services/ssl/cert.pem", "backend/services/ssl/key.pem"); err != nil && err != http.ErrServerClosed {
 			logger.Fatalf("Could not listen on %s: %v\n", server.Addr, err)
 		}
 	}()
