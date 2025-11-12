@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "MCPGo_Bruno",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

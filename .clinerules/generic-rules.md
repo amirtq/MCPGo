@@ -1,0 +1,1 @@
+1 - alyas use go.mod and go mod tidy to add new modules to the system neven directly install them via cli.

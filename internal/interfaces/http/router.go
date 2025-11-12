@@ -7,13 +7,18 @@
 
 package http
 
-import "net/http"
+import (
+	"net/http"
+
+	httpSwagger "github.com/swaggo/http-swagger"
+)
 
 // NewRouter creates a new HTTP router and registers the handlers.
 func NewRouter(handlers *Handlers) *http.ServeMux {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("GET /healthz", handlers.HealthzHandler)
+	mux.HandleFunc("/swagger/", httpSwagger.WrapHandler)
+	mux.HandleFunc("GET /health", handlers.HealthHandler)
 
 	mux.HandleFunc("POST /servers", handlers.RegisterServerHandler)
 	mux.HandleFunc("GET /servers", handlers.ListServersHandler)

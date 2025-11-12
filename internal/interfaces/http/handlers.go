@@ -25,6 +25,16 @@ type Handlers struct {
 }
 
 // RegisterServerHandler handles the HTTP request to register a server.
+// @Summary Register a new server
+// @Description Register a new server
+// @Tags servers
+// @Accept  json
+// @Produce  json
+// @Param server body dto.RegisterServerRequest true "Server to register"
+// @Success 201 {object} map[string]string
+// @Failure 400 {string} string "Invalid request body"
+// @Failure 500 {string} string "Internal server error"
+// @Router /servers [post]
 func (h *Handlers) RegisterServerHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.RegisterServerRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -50,6 +60,13 @@ func (h *Handlers) RegisterServerHandler(w http.ResponseWriter, r *http.Request)
 }
 
 // ListServersHandler handles the HTTP request to list all servers.
+// @Summary List all servers
+// @Description List all servers
+// @Tags servers
+// @Produce  json
+// @Success 200 {array} dto.ServerResponse
+// @Failure 500 {string} string "Internal server error"
+// @Router /servers [get]
 func (h *Handlers) ListServersHandler(w http.ResponseWriter, r *http.Request) {
 	query := queries.ListServersQuery{}
 	servers, err := h.ListServers.Handle(r.Context(), query)
@@ -63,6 +80,16 @@ func (h *Handlers) ListServersHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // RouteCallHandler handles the HTTP request to route a call.
+// @Summary Route a call to a server
+// @Description Route a call to a server
+// @Tags routing
+// @Accept  json
+// @Produce  json
+// @Param route body dto.RouteRequest true "Route request"
+// @Success 200 {object} dto.RouteResponse
+// @Failure 400 {string} string "Invalid request body"
+// @Failure 500 {string} string "Internal server error"
+// @Router /route [post]
 func (h *Handlers) RouteCallHandler(w http.ResponseWriter, r *http.Request) {
 	var req dto.RouteRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -86,7 +113,13 @@ func (h *Handlers) RouteCallHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // HealthzHandler is a simple health check endpoint.
-func (h *Handlers) HealthzHandler(w http.ResponseWriter, r *http.Request) {
+// @Summary Health check
+// @Description Health check
+// @Tags health
+// @Produce  json
+// @Success 200 {object} map[string]string
+// @Router /health [get]
+func (h *Handlers) HealthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"status": "healthy"})

@@ -5,6 +5,21 @@
 // requires a separate commercial license from Amir.
 // Contact: licensing@mcpgo.io
 
+// @title MCPGo API
+// @version 1.0
+// @description This is a sample server for MCPGo.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost
+// @BasePath /
+// @schemes https
 package main
 
 import (
@@ -22,6 +37,9 @@ import (
 	"mcpgo/internal/infrastructure/obs"
 	"mcpgo/internal/infrastructure/persistence/memory"
 	http_iface "mcpgo/internal/interfaces/http"
+	"mcpgo/internal/platform/certs"
+
+	_ "mcpgo/docs"
 )
 
 func main() {
@@ -46,14 +64,18 @@ func main() {
 	// 4. Create Router and Server
 	router := http_iface.NewRouter(handlers)
 	server := &http.Server{
-		Addr:    ":8080", // This would come from config in a real app
+		Addr:    ":443", // This would come from config in a real app
 		Handler: router,
 	}
 
-	// 5. Start Server with Graceful Shutdown
+	// 5. Ensure certificates are available and start server with Graceful Shutdown
+	if err := certs.EnsureCerts(); err != nil {
+		logger.Fatalf("Could not ensure certificates: %v\n", err)
+	}
+
 	go func() {
-		logger.Println("Starting server on", server.Addr)
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		logger.Println("Starting server on https://localhost" + server.Addr)
+		if err := server.ListenAndServeTLS("configs/certs/cert.pem", "configs/certs/key.pem"); err != nil && err != http.ErrServerClosed {
 			logger.Fatalf("Could not listen on %s: %v\n", server.Addr, err)
 		}
 	}()

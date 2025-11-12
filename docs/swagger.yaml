@@ -1,0 +1,157 @@
+basePath: /
+definitions:
+  dto.RegisterServerRequest:
+    properties:
+      address:
+        type: string
+      name:
+        type: string
+      protocol:
+        type: string
+    type: object
+  dto.RouteRequest:
+    properties:
+      payload:
+        items:
+          type: integer
+        type: array
+      server_id:
+        type: string
+    type: object
+  dto.RouteResponse:
+    properties:
+      data:
+        description: In a real implementation, this would be a structured response.
+        items:
+          type: integer
+        type: array
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  dto.ServerResponse:
+    properties:
+      address:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      protocol:
+        type: string
+    type: object
+host: localhost
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample server for MCPGo.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: MCPGo API
+  version: "1.0"
+paths:
+  /health:
+    get:
+      description: Health check
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health check
+      tags:
+      - health
+  /route:
+    post:
+      consumes:
+      - application/json
+      description: Route a call to a server
+      parameters:
+      - description: Route request
+        in: body
+        name: route
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RouteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.RouteResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Route a call to a server
+      tags:
+      - routing
+  /servers:
+    get:
+      description: List all servers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.ServerResponse'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: List all servers
+      tags:
+      - servers
+    post:
+      consumes:
+      - application/json
+      description: Register a new server
+      parameters:
+      - description: Server to register
+        in: body
+        name: server
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RegisterServerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Register a new server
+      tags:
+      - servers
+schemes:
+- https
+swagger: "2.0"
