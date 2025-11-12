@@ -7,7 +7,7 @@ tmp_dir = "tmp"
 
 [build]
 # Just plain old shell command. You could use `make` as well.
-cmd = "~/go/bin/swag init -g cmd/mcpgo/main.go && go build -o ./bin/mcpgo ./cmd/mcpgo"
+cmd = "~/go/bin/swag init -g backend/main.go -o backend/apps/swagger && go build -o ./bin/mcpgo ./backend"
 # Binary file yields from `cmd`.
 bin = "bin/mcpgo"
 # Customize binary, can setup environment variables when run your app.
@@ -19,7 +19,7 @@ exclude_ext = []
 # Watch these directories.
 include_dir = []
 # Exclude these directories.
-exclude_dir = ["assets", "tmp", "vendor", "docs"]
+exclude_dir = ["assets", "tmp", "vendor", "backend/apps/swagger"]
 # Exclude files.
 exclude_file = []
 # It's not necessary to trigger build each time file changes if it's too frequent.
